@@ -7,7 +7,7 @@
 #define GatePin 3
 #define CAP_REC 7
 #define BUZZ 13
-#define FREQ 1000  // FREQ works with tone(), but it cannot change the volume.
+#define FREQ 400  // FREQ works with tone(), but it cannot change the volume.
 
 // Feeder activation
 int GatePWM = 0; // initially closed state
@@ -23,7 +23,7 @@ unsigned long initialMillis;
 unsigned long dt; // delta time. `millis() - initialMillis`
 int cycleDuration = 25; // The length of each cycle in `loop` in millisecond: This is also lickometer sampling rate.
 int timeoutDelay = cycleDuration-1; // lickometer time out max in millisecond.
-int valveOpenDelay = 500; // Delayed feeding after button press in millisecond
+int valveOpenDelay = 3000; // Delayed feeding after button press in millisecond
 int valveOpenDuration = 2000; // in millisecond.
 int toneDuration = 1000; // in millisecond.
 int toneVol = 100; // volume intensity less than 256. This does not work with `tone()` function; and tone frequency cannot be changed.
@@ -57,7 +57,9 @@ void loop() {
   //// Feeder activator
   // Turn on `feederState` and initialize `timeCounter`
   if (buttonState != lastButtonState && buttonState == HIGH){ 
-    timeCounter = 0;
+    if (GatePWM != 255){ //Once valve is open, it does not respond to the trigger. 
+      timeCounter = 0;
+    }
     feederState = 1;
   }
   // When feederState is On, turn on `GatePWM`. `timeCounter` is for delayed feeder activation.
@@ -65,8 +67,8 @@ void loop() {
       _toneVol = toneVol;
       GatePWM = 255;
       analogWrite(GatePin, GatePWM);
-      analogWrite(BUZZ, _toneVol);
-      //tone(BUZZ, FREQ, toneDuration); // For now `toneDuration` cannot be longer than valveOpenDuration.
+      //analogWrite(BUZZ, _toneVol);
+      tone(BUZZ, FREQ, toneDuration); // For now `toneDuration` cannot be longer than valveOpenDuration.
       //toneAC(FREQ, 2, 1000);
       //vol.tone(440, 255);
       timeCounter = 0;
@@ -95,6 +97,8 @@ void loop() {
   Serial.print(buttonState);
   Serial.print(",");
   Serial.print(GatePWM);
+  Serial.print(",");
+  Serial.print(dt);
   Serial.print(",");
   Serial.println(lickState);
 }
