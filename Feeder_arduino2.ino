@@ -8,6 +8,7 @@
 #define CAP_REC 7
 #define BUZZ 13
 #define FREQ 400  // FREQ works with tone(), but it cannot change the volume.
+#define TRIGGER_PIN 14 //Analog pin A0.
 
 // Feeder activation
 int GatePWM = 0; // initially closed state
@@ -15,6 +16,7 @@ int feederState = 0;
 int buttonState = 0;         // current state of the button
 int lastButtonState = 0;     // previous state of the button
 int lickState = 0;
+int trigger = 0;
 
 // Capacitive sensor
 
@@ -41,6 +43,7 @@ void setup() {
   pinMode(GatePin, OUTPUT);
   pinMode(BUZZ, OUTPUT);
   pinMode(CAP_REC, INPUT);
+  pinMode(TRIGGER_PIN, INPUT);
   
   analogWrite(GatePin, GatePWM); // Initially feeder is closed
   
@@ -53,6 +56,7 @@ void loop() {
   initialMillis = millis();  // initial time.
   buttonState = digitalRead(LEVER_PIN);
   lickState = digitalRead(CAP_REC);
+  trigger = digitalRead(TRIGGER_PIN);
   
   //// Feeder activator
   // Turn on `feederState` and initialize `timeCounter`
@@ -99,6 +103,8 @@ void loop() {
   Serial.print(GatePWM);
   Serial.print(",");
   Serial.print(dt);
+  Serial.print(",");
+  Serial.print(trigger);
   Serial.print(",");
   Serial.println(lickState);
 }
